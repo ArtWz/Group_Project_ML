@@ -98,9 +98,9 @@ def prepareData(scaling=False, removed_features=[]):
     test_df = test_con.join([test_cat, test_labels])
     
     # Export scaler and encoder and return transformed datasets
-    joblib.dump(ohe, 'onehotencoder.gz')
-    joblib.dump(le, 'labelencoder.gz')
+    joblib.dump(ohe, 'IDS/preprocessing/onehotencoder.gz')
+    joblib.dump(le, 'IDS/preprocessing/labelencoder.gz')
     if scaling == True:
-        joblib.dump(scaler, 'scaler.gz')
+        joblib.dump(scaler, 'IDS/preprocessing/scaler.gz')
 
     return train_df, test_df
