@@ -1,10 +1,10 @@
 import pandas as pd
 import numpy as np
-from sklearn.preprocessing import StandardScaler, OneHotEncoder, LabelEncoder
+from sklearn.preprocessing import StandardScaler, MinMaxScaler, OneHotEncoder, LabelEncoder
 import joblib
+import sys
 
-
-def prepareData(scaling=False, removed_features=[]):
+def prepareData(scaling='none', removed_features=[]):
 
     # Load data into a DataFrame
     train_df = pd.read_csv("Dataset/kddcup.data_10_percent.gz", compression='gzip', header=None)
@@ -74,12 +74,20 @@ def prepareData(scaling=False, removed_features=[]):
     test_con = test_df.drop(columns=categorical_cols+['label'], errors='ignore')
     train_cat = train_df.filter(categorical_cols)
     test_cat = test_df.filter(categorical_cols)
-    train_labels = train_df.filter(['label'])
-    test_labels = test_df.filter(['label'])
+    train_labels = train_df['label']
+    test_labels = test_df['label']
     
     # Scale continuous features
-    if scaling == True:
-        scaler = StandardScaler().set_output(transform='pandas')
+    if scaling != 'none':
+        match scaling:
+            case 'standard':
+                scaler = StandardScaler().set_output(transform='pandas')
+            case 'minmax':
+                scaler = MinMaxScaler().set_output(transform='pandas')
+            case _:
+                print('Invalid scaling type selected. Please select either \'standard\' or \'minmax\'.')
+                sys.exit(1)
+                
         train_con = scaler.fit_transform(train_con)
         test_con = scaler.transform(test_con)
     
@@ -88,14 +96,14 @@ def prepareData(scaling=False, removed_features=[]):
     train_cat = ohe.fit_transform(train_cat)
     test_cat = ohe.transform(test_cat)
     
+    # Rejoin features into single dataframe
+    x_train = train_con.join(train_cat)
+    x_test = test_con.join(test_cat)
+
     # Encode labels
     le = LabelEncoder()
-    train_labels = train_labels.apply(le.fit_transform)
-    test_labels = test_labels.apply(le.transform)
-    
-    # Rejoin features and labels into single dataframe
-    train_df = train_con.join([train_cat, train_labels])
-    test_df = test_con.join([test_cat, test_labels])
+    y_train = le.fit_transform(train_labels)
+    y_test = le.transform(test_labels)
     
     # Export scaler and encoder and return transformed datasets
     joblib.dump(ohe, 'IDS/preprocessing/onehotencoder.gz')
@@ -103,8 +111,4 @@ def prepareData(scaling=False, removed_features=[]):
     if scaling == True:
         joblib.dump(scaler, 'IDS/preprocessing/scaler.gz')
 
-    x_train = train_df.drop(columns=['label'])
-    y_train = train_df['label']
-    x_test = test_df.drop(columns=['label'])
-    y_test = test_df['label']
     return x_train, y_train, x_test, y_test
