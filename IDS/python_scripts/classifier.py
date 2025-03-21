@@ -5,10 +5,22 @@ from sklearn.preprocessing import StandardScaler, OneHotEncoder, LabelEncoder
 import joblib
 import io
 from xgboost import XGBClassifier
+from sklearn.ensemble import RandomForestClassifier
+from xgb import XGBoost
+from randomforest import RandomForest
 
 normal = open('logs/normal.txt', 'a')
 attacks = open('logs/attacks.txt', 'a')
-record = sys.argv[1]
+model_name = sys.argv[1]
+record = sys.argv[2]
+
+match model_name:
+    case 'xgboost':
+        model = XGBoost()
+    case 'randomforest':
+        model = RandomForest()
+    case _:
+        print('Invalid model selected.')
 
 # Create dataframe from captured connection record
 datapoint = pd.read_csv(io.StringIO(record), header=None)
@@ -25,20 +37,8 @@ all_columns = [
 
 datapoint.columns = all_columns
 
-# Import encoders and scaler
-ohe = joblib.load('preprocessing/onehotencoder.gz')
-le = joblib.load('preprocessing/labelencoder.gz')
-### Need to add scaler
-
-# Need to generalise this
-dropped_features = [
-    "srv_serror_rate", "serror_rate", "dst_host_srv_serror_rate", "srv_rerror_rate",
-    "dst_host_rerror_rate", "dst_host_srv_rerror_rate", "dst_host_same_srv_rate",
-    "dst_host_serror_rate", "wrong_fragment", "urgent", "diff_srv_rate", "same_srv_rate",
-    "srv_diff_host_rate" , "dst_host_srv_diff_host_rate", "rerror_rate"
-]
-
-datapoint = datapoint.drop(columns=dropped_features)
+# Model-specific preprocessing
+datapoint = model.preprocess(datapoint)
 
 # Split datapoint into continuous and categorical features
 categorical_cols = ['protocol_type', 'service', 'flag', 'land']
@@ -46,19 +46,18 @@ continuous = datapoint.drop(columns=categorical_cols, errors='ignore')
 categorical = datapoint.filter(categorical_cols)
 
 # Encode categorical features
+ohe = joblib.load('preprocessing/onehotencoder.gz')
 categorical = ohe.transform(categorical)
 
 # Rejoin features into single dataframe
 datapoint = continuous.join(categorical)
-
-# Load trained model
-model = joblib.load('models/xgb.gz')
 
 # Classify datapoint
 prediction = model.predict(datapoint)
 print(prediction)
 
 # Decode prediction
+le = joblib.load('preprocessing/labelencoder.gz')
 prediction = le.inverse_transform(prediction)
 print(prediction)
 

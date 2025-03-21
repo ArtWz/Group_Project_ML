@@ -8,15 +8,16 @@ mkdir -p logs
 rm -f logs/*
 
 function run_model {
+
 	# Keep function running so it continues to receive records
 	while true;
 	do
 		# Run classifier whenever new record received
-		read record && python python_scripts/classifier.py $record
+		read record && python python_scripts/classifier.py $1 $record
 	done
 }
 
-../../kdd99extractor | run_model & # Run feature extractor and pipe output to function
+../../kdd99extractor | run_model $1 & # Run feature extractor and pipe output to function
 
 # Kill child processes (i.e. extractor) when script ended
 trap "pkill -P $$;exit" EXIT
