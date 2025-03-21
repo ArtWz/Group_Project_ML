@@ -103,4 +103,8 @@ def prepareData(scaling=False, removed_features=[]):
     if scaling == True:
         joblib.dump(scaler, 'IDS/preprocessing/scaler.gz')
 
-    return train_df, test_df
+    x_train = train_df.drop(columns=['label'])
+    y_train = train_df['label']
+    x_test = test_df.drop(columns=['label'])
+    y_test = test_df['label']
+    return x_train, y_train, x_test, y_test
