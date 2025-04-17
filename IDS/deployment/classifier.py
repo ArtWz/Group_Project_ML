@@ -10,8 +10,6 @@ from xgb import XGBoost
 from randomforest import RandomForest
 from lgbm import LightGBM
 
-normal = open('logs/normal.txt', 'a')
-attacks = open('logs/attacks.txt', 'a')
 model_name = sys.argv[1]
 record = sys.argv[2]
 
@@ -23,7 +21,8 @@ match model_name:
     case 'lightgbm':
         model = LightGBM()
     case _:
-        print('Invalid model selected.')
+        print('Error: Invalid model selected')
+        sys.exit()
 
 # Create dataframe from captured connection record
 datapoint = pd.read_csv(io.StringIO(record), header=None)
@@ -57,19 +56,27 @@ datapoint = continuous.join(categorical)
 
 # Classify datapoint
 prediction = model.predict(datapoint)
-print(prediction)
 
 # Decode prediction
 le = joblib.load('preprocessing/labelencoder.gz')
 prediction = le.inverse_transform(prediction)
+prediction = prediction[0]
 print(prediction)
 
-# attack = prediction == 1
+# Write record to log
+record = record + "\n"
 
-# # Write record to log
-# record = record + "\n"
-# if (attack):
-#     attacks.write(record)
-#     print("Attack detected!")
-# else:
-#     normal.write(record)
+if (prediction == 'Normal'):
+    normal = open('logs/normal.txt', 'a')
+    normal.write(record)
+elif (prediction == 'DoS'):
+    dos = open('logs/dos.txt', 'a')
+    dos.write(record)
+elif (prediction == 'R2L'):
+    r2l = open('logs/r2l.txt', 'a')
+    r2l.write(record)
+elif (prediction == 'Probing'):
+    probing = open('logs/probing.txt', 'a')
+    probing.write(record)
+else:
+    print("Error: Unknown attack type")

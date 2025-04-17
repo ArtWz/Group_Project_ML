@@ -20,7 +20,7 @@ function run_model {
 ../../kdd99extractor | run_model $1 & # Run feature extractor and pipe output to function
 
 # Kill child processes (i.e. extractor) when script ended
-trap "pkill -P $$;exit" EXIT
+trap "pkill -9 -P $$;exit" EXIT
 
 # Keep script running until interrupt received
 while true;
