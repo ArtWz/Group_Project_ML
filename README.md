@@ -13,4 +13,5 @@ This project focuses on building an IDS that incorporates machine learning algor
 - recorded the models performance in the simulation
 # Documentation:
 [Detailed 17,000 word Report for project](Report_for_project.pdf)
-  
+
+This report details the research, design, implementaion and evaluation of our network intrusion detection system, including data cleaning,preperation,sampling,feature engineering,feature selection etc.
