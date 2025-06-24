@@ -12,5 +12,5 @@ This project focuses on building an IDS that incorporates machine learning algor
 - used a Test bash script in order to build a testing framework to observe the simulation performance
 - recorded the models performance in the simulation
   # Documentation:
-  [full 17,000 word Report for project](Report)
+  [Detailed 17,000 word Report for project](Report_for_project.pdf)
   
