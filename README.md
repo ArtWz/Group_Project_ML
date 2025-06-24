@@ -11,6 +11,6 @@ This project focuses on building an IDS that incorporates machine learning algor
 - combining 4 main components to create the IDS which consisted off a KDD'99 feature extractor,our machine learning models,classifier scripts and a bash script.
 - used a Test bash script in order to build a testing framework to observe the simulation performance
 - recorded the models performance in the simulation
-  # Documentation:
-  [Detailed 17,000 word Report for project](Report_for_project.pdf)
+# Documentation:
+[Detailed 17,000 word Report for project](Report_for_project.pdf)
   
